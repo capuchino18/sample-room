@@ -1,6 +1,6 @@
-// Solusi darurat agar Vercel mengenali __dirname
-if (typeof globalThis.__dirname === 'undefined') {
-  globalThis.__dirname = process.cwd();
+// Menangkal error __dirname di lingkungan Vercel/Serverless
+if (typeof (global as any).__dirname === 'undefined') {
+  (global as any).__dirname = process.cwd();
 }
 
 /** @type {import('next').NextConfig} */
