@@ -1,4 +1,3 @@
-// Menangkal error __dirname di lingkungan Vercel/Serverless
 if (typeof (global as any).__dirname === 'undefined') {
   (global as any).__dirname = process.cwd();
 }
@@ -8,6 +7,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Tambahkan baris ini untuk mengubah mode output
+  output: 'standalone',
 };
 
 export default nextConfig;

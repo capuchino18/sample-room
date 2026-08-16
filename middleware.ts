@@ -1,3 +1,8 @@
+// Tangkal error dirname di lingkungan Vercel Edge
+if (typeof (globalThis as any).__dirname === 'undefined') {
+  (globalThis as any).__dirname = '/';
+}
+
 import { type NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase/middleware'
 
@@ -7,10 +12,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Matcher ini memberi tahu Vercel untuk menjalankan middleware di semua rute,
-     * KECUALI file statis seperti gambar, favicon, atau aset Next.js agar web tetap cepat.
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
