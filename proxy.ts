@@ -1,13 +1,7 @@
-export const runtime = 'nodejs'
-
-if (typeof (globalThis as any).__dirname === 'undefined') {
-  (globalThis as any).__dirname = '/';
-}
-
 import { type NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   return await updateSession(request)
 }
 
