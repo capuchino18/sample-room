@@ -1,4 +1,5 @@
-// Tangkal error dirname di lingkungan Vercel Edge
+export const runtime = 'nodejs'
+
 if (typeof (globalThis as any).__dirname === 'undefined') {
   (globalThis as any).__dirname = '/';
 }
