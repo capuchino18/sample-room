@@ -12,6 +12,12 @@ export default function StockOpnamePage() {
   const [newStok, setNewStok] = useState<number | string>('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // State untuk fitur Hapus
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [sampleToDelete, setSampleToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const supabase = createClient();
 
   const fetchAllSamples = async () => {
@@ -61,6 +67,36 @@ export default function StockOpnamePage() {
     }
   };
 
+  // Fungsi untuk trigger modal hapus
+  const handleDeleteClick = (item: any) => {
+    setSampleToDelete(item);
+    setDeleteError('');
+    setIsDeleteModalOpen(true);
+  };
+
+  // Fungsi eksekusi hapus ke Supabase
+  const handleConfirmDelete = async () => {
+    if (!sampleToDelete) return;
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    const { error } = await supabase
+      .from('samples')
+      .delete()
+      .eq('id', sampleToDelete.id);
+
+    setIsDeleting(false);
+
+    if (error) {
+      setDeleteError("GAGAL MENGHAPUS SAMPEL: " + error.message);
+    } else {
+      setIsDeleteModalOpen(false);
+      setSampleToDelete(null);
+      fetchAllSamples();
+    }
+  };
+
   return (
     <div className="p-6 md:p-10 w-full max-w-7xl mx-auto relative">
       <div className="mb-8">
@@ -84,7 +120,8 @@ export default function StockOpnamePage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Tabel dikembalikan ke desain asli Anda yang lebih rapi */}
+        <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b-2 border-slate-100 text-xs text-slate-500 uppercase bg-slate-50">
@@ -112,7 +149,11 @@ export default function StockOpnamePage() {
                       <span className="bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">{item.stok || 0}</span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <button onClick={() => handleEditClick(item)} className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded text-sm font-medium">Edit Stok</button>
+                      {/* Tombol dikembalikan ke ukuran dan style asli Anda */}
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => handleEditClick(item)} className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded text-sm font-medium">Edit Stok</button>
+                        <button onClick={() => handleDeleteClick(item)} className="bg-white border border-red-200 hover:bg-red-50 text-[#E31B23] px-4 py-1.5 rounded text-sm font-medium">Hapus</button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -124,6 +165,7 @@ export default function StockOpnamePage() {
         </div>
       </div>
 
+      {/* Modal Edit Stok */}
       {isModalOpen && selectedSample && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
@@ -139,6 +181,41 @@ export default function StockOpnamePage() {
                 <button type="submit" disabled={isSaving} className="px-4 py-2 bg-[#E31B23] text-white rounded-lg font-bold hover:bg-[#c9141b]">{isSaving ? 'Menyimpan...' : 'Simpan Stok'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Hapus Sampel */}
+      {isDeleteModalOpen && sampleToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Hapus Sampel?</h3>
+            <p className="text-sm text-slate-500 mb-4">
+              Kamu akan menghapus <span className="font-semibold text-slate-800">{sampleToDelete.brand} - {sampleToDelete.name || sampleToDelete.nama_sampel || sampleToDelete.seri}</span> secara permanen dari daftar sampel. Gunakan ini untuk barang yang sudah discontinue. Tindakan ini tidak bisa dibatalkan.
+            </p>
+
+            {deleteError && (
+              <p className="text-sm text-red-600 font-medium mb-4">{deleteError}</p>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => { setIsDeleteModalOpen(false); setSampleToDelete(null); }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-slate-600 disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-[#E31B23] text-white rounded-lg font-bold hover:bg-[#c9141b] disabled:opacity-50"
+              >
+                {isDeleting ? 'Menghapus...' : 'Ya, Hapus Sampel'}
+              </button>
+            </div>
           </div>
         </div>
       )}
