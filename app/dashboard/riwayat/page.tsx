@@ -12,7 +12,9 @@ export default function RiwayatPage() {
 
   const [selectedDateFilter, setSelectedDateFilter] = useState('');
   
+  // State Modal Export & Mode Rentang vs Hari Ini
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportMode, setExportMode] = useState<'RENTANG' | 'HARI_INI'>('HARI_INI');
   const [exportStartDate, setExportStartDate] = useState('');
   const [exportEndDate, setExportEndDate] = useState('');
   const [exportType, setExportType] = useState('SEMUA');
@@ -29,7 +31,7 @@ export default function RiwayatPage() {
     const { data } = await supabase
       .from('riwayat_transaksi')
       .select('*')
-      .order('created_at', { ascending: true }); // Diurutkan dari yang terlama ke terbaru agar Slide 1 adalah hari pertama
+      .order('created_at', { ascending: true });
     
     if (data) {
       setAllRiwayat(data);
@@ -50,11 +52,10 @@ export default function RiwayatPage() {
       groups[dateOnly].push(item);
     });
 
-    // Urutkan tanggal dari terlama ke terbaru (ascending)
     const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
     setGroupedData(groups);
     setDateKeys(keys);
-    setCurrentSlideIndex(0); // Mulai dari slide pertama (index 0)
+    setCurrentSlideIndex(0);
   };
 
   const handleHapusRiwayat = async (id: any) => {
@@ -123,20 +124,28 @@ export default function RiwayatPage() {
 
   const handleExportExcel = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!exportStartDate || !exportEndDate) {
-      alert("Silakan pilih rentang tanggal!");
-      return;
-    }
+    const todayStr = new Date().toISOString().split('T')[0];
 
     const filteredExport = allRiwayat.filter(item => {
       const itemDate = item.created_at ? item.created_at.split('T')[0] : '';
-      const isDateMatch = itemDate >= exportStartDate && itemDate <= exportEndDate;
+      let isDateMatch = true;
+
+      if (exportMode === 'HARI_INI') {
+        isDateMatch = itemDate === todayStr;
+      } else {
+        if (!exportStartDate || !exportEndDate) {
+          alert("Silakan pilih rentang tanggal!");
+          return false;
+        }
+        isDateMatch = itemDate >= exportStartDate && itemDate <= exportEndDate;
+      }
+
       const isTypeMatch = exportType === 'SEMUA' ? true : item.tipe === exportType;
       return isDateMatch && isTypeMatch;
     });
 
     if (filteredExport.length === 0) {
-      alert("Tidak ada data pada rentang dan jenis tersebut.");
+      alert("Tidak ada data transaksi yang sesuai untuk diexport.");
       return;
     }
 
@@ -162,7 +171,7 @@ export default function RiwayatPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Laporan_${exportType}_${exportStartDate}_s_d_${exportEndDate}.xls`;
+    a.download = `Laporan_${exportType}_${exportMode === 'HARI_INI' ? todayStr : `${exportStartDate}_s_d_${exportEndDate}`}.xls`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -194,7 +203,6 @@ export default function RiwayatPage() {
           <input type="date" value={selectedDateFilter} onChange={handleDateFilterChange} className="px-4 py-2 border border-slate-300 rounded-lg text-sm w-full md:w-auto" />
         </div>
         <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-          {/* Tombol Navigasi Normal (Sebelumnya / Selanjutnya) */}
           <button 
             onClick={() => setCurrentSlideIndex(Math.max(0, currentSlideIndex - 1))} 
             disabled={currentSlideIndex === 0} 
@@ -297,6 +305,7 @@ export default function RiwayatPage() {
         </div>
       )}
 
+      {/* Modal Export Excel dengan Opsi Data Hari Ini */}
       {isExportModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -310,15 +319,29 @@ export default function RiwayatPage() {
                   <option value="KELUAR">Hanya Barang Keluar</option>
                 </select>
               </div>
+              
               <div className="mb-4">
-                <label className="block text-sm font-semibold mb-1 text-slate-700">Dari Tanggal</label>
-                <input type="date" value={exportStartDate} onChange={(e) => setExportStartDate(e.target.value)} required className="w-full px-4 py-2 border rounded-lg" />
+                <label className="block text-sm font-semibold mb-1 text-slate-700">Pilih Periode Export</label>
+                <select value={exportMode} onChange={(e) => setExportMode(e.target.value as any)} className="w-full px-4 py-2 border rounded-lg bg-white">
+                  <option value="HARI_INI">Data Hari Ini Saja</option>
+                  <option value="RENTANG">Berdasarkan Rentang Tanggal</option>
+                </select>
               </div>
-              <div className="mb-6">
-                <label className="block text-sm font-semibold mb-1 text-slate-700">Sampai Tanggal</label>
-                <input type="date" value={exportEndDate} onChange={(e) => setExportEndDate(e.target.value)} required className="w-full px-4 py-2 border rounded-lg" />
-              </div>
-              <div className="flex justify-end gap-3">
+
+              {exportMode === 'RENTANG' && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-1 text-slate-700">Dari Tanggal</label>
+                    <input type="date" value={exportStartDate} onChange={(e) => setExportStartDate(e.target.value)} required={exportMode === 'RENTANG'} className="w-full px-4 py-2 border rounded-lg" />
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold mb-1 text-slate-700">Sampai Tanggal</label>
+                    <input type="date" value={exportEndDate} onChange={(e) => setExportEndDate(e.target.value)} required={exportMode === 'RENTANG'} className="w-full px-4 py-2 border rounded-lg" />
+                  </div>
+                </>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setIsExportModalOpen(false)} className="px-4 py-2 text-slate-600">Batal</button>
                 <button type="submit" className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Download Excel</button>
               </div>

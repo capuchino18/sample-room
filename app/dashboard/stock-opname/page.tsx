@@ -146,7 +146,6 @@ export default function StockOpnamePage() {
                 filteredSamples.map((item: any) => (
                   <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="py-4 px-4">
-                      {/* Badge Serasi */}
                       <span className={`px-2.5 py-1 rounded text-[10px] font-black tracking-wider shadow-sm ${
                         item.brand === 'ROMAN' ? 'bg-[#FBB03B] text-[#b91c1c]' : 'bg-slate-900 text-white'
                       }`}>
@@ -172,8 +171,96 @@ export default function StockOpnamePage() {
         </div>
       </div>
 
-      {/* Modal Tambah & Edit tetap mengikuti logika Anda */}
-      {/* (Modal tidak saya tulis ulang untuk menghemat ruang, tapi pastikan kode sebelumnya tetap ada) */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Tambah Sampel Baru</h3>
+            <form onSubmit={handleAddSubmit}>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">Nama / Seri <span className="text-red-500">*</span></label>
+                  <input type="text" required value={addForm.name} onChange={(e) => setAddForm({...addForm, name: e.target.value})} placeholder="Contoh: AGATA CIELO" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">Brand</label>
+                  <select value={addForm.brand} onChange={(e) => setAddForm({...addForm, brand: e.target.value})} className="w-full px-4 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-[#E31B23]">
+                    <option value="ROMAN">ROMAN</option>
+                    <option value="QUADRA">QUADRA</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Nomor Rak <span className="text-red-500">*</span></label>
+                  <input type="text" required placeholder="Contoh: A" value={addForm.rak} onChange={(e) => setAddForm({...addForm, rak: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Ambalan Ke- <span className="text-xs text-slate-400 font-normal">(Opsional)</span></label>
+                  <input type="text" placeholder="Boleh kosong" value={addForm.ambalan} onChange={(e) => setAddForm({...addForm, ambalan: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div className="col-span-2 mb-2">
+                  <label className="block text-sm font-semibold mb-1">Stok Awal <span className="text-xs text-slate-400 font-normal">(Kosongkan jika 0)</span></label>
+                  <input type="number" placeholder="0" value={addForm.stok} onChange={(e) => setAddForm({...addForm, stok: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-slate-600">Batal</button>
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-slate-900 text-white rounded-lg font-bold">{isSaving ? 'Menyimpan...' : 'Simpan Sampel'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Edit Data Sampel</h3>
+            <form onSubmit={handleEditSubmit}>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">Nama / Seri</label>
+                  <input type="text" required value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold mb-1">Brand</label>
+                  <select value={editForm.brand} onChange={(e) => setEditForm({...editForm, brand: e.target.value})} className="w-full px-4 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-[#E31B23]">
+                    <option value="ROMAN">ROMAN</option>
+                    <option value="QUADRA">QUADRA</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Nomor Rak</label>
+                  <input type="text" required value={editForm.rak} onChange={(e) => setEditForm({...editForm, rak: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Ambalan Ke-</label>
+                  <input type="text" value={editForm.ambalan} onChange={(e) => setEditForm({...editForm, ambalan: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+                <div className="col-span-2 mb-2">
+                  <label className="block text-sm font-semibold mb-1">Stok Saat Ini</label>
+                  <input type="number" min="0" value={editForm.stok} onChange={(e) => setEditForm({...editForm, stok: e.target.value})} className="w-full px-4 py-2 text-lg font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#E31B23]" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-slate-600">Batal</button>
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-[#E31B23] hover:bg-[#c9141b] text-white rounded-lg font-bold">{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && sampleToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Hapus Sampel?</h3>
+            <p className="text-sm text-slate-500 mb-4">Anda yakin ingin menghapus data <span className="font-bold text-slate-900">{sampleToDelete.name || sampleToDelete.nama_sampel}</span> secara permanen?</p>
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-slate-600">Batal</button>
+              <button type="button" onClick={handleConfirmDelete} disabled={isDeleting} className="px-4 py-2 bg-[#E31B23] text-white rounded-lg font-bold">Ya, Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
