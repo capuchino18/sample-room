@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -7,14 +7,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const router = useRouter();
-
-  // Cek jika sudah pernah login sebelumnya di device ini
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('sample_room_logged_in');
-    if (isLoggedIn === 'true') {
-      router.push('/dashboard');
-    }
-  }, [router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

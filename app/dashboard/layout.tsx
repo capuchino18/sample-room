@@ -30,6 +30,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
+  // Menghapus flag login PIN dan mengembalikan pengguna ke halaman PIN.
+  const handleLogout = () => {
+    localStorage.removeItem('sample_room_logged_in');
+    router.replace('/');
+  };
+
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Sampel', path: '/dashboard/samples' },
@@ -73,6 +79,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
           ))}
         </nav>
+
+        {/* Tombol Logout - menghapus sesi PIN dan kembali ke halaman login */}
+        <button
+          onClick={handleLogout}
+          className="absolute bottom-6 left-6 right-6 px-6 py-3 text-sm font-semibold text-white bg-slate-800 hover:bg-[#E31B23] rounded-xl transition text-left"
+        >
+          🚪 Keluar
+        </button>
       </aside>
 
       {/* Overlay hitam transparan saat sidebar terbuka di HP */}
