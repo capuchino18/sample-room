@@ -1,61 +1,91 @@
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin === '1234') { // PIN sementara untuk demo
-      router.push('/dashboard');
+    
+    // Cek apakah PIN benar
+    if (pin === '1234') {
+      setIsLoading(true);
+      setError(false);
+      
+      // Memberikan jeda waktu (1.5 detik) agar logo Lyman terlihat saat loading, lalu pindah ke dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
+      
     } else {
-      setError('PIN tidak valid. Silakan coba lagi.');
+      // Jika PIN salah
+      setError(true);
+      setPin('');
     }
   };
 
+  // --- TAMPILAN SAAT LOADING ---
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <img 
+          src="/lyman.png" 
+          alt="Lyman Logo" 
+          className="w-48 md:w-64 h-auto animate-pulse" 
+        />
+        <p className="mt-4 text-slate-400 font-semibold tracking-wider text-sm">MEMUAT DATA...</p>
+      </div>
+    );
+  }
+
+  // --- TAMPILAN HALAMAN LOGIN (PIN) ---
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#E31B23] flex flex-col items-center justify-center p-6">
       
-      {/* Logo Lyman Group */}
-      <div className="mb-12">
-        <img src="/lyman.png" alt="Lyman Group Logo" className="h-24 md:h-32 object-contain" />
+      {/* Bagian Judul */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-black text-white tracking-wider mb-2 drop-shadow-md">
+          ROMAN & QUADRA
+        </h1>
+        <h2 className="text-lg md:text-xl font-bold text-white/90 tracking-widest drop-shadow-sm">
+          SAMPEL ROOM
+        </h2>
       </div>
 
-      {/* Form Login (Operator Access) */}
-      <div className="w-full max-w-sm">
-        <h2 className="text-xl font-bold text-slate-800 text-center mb-2">Sample Room Portal</h2>
-        <p className="text-sm text-slate-500 text-center mb-8">Masukkan PIN Operator untuk mengakses sistem.</p>
+      {/* Form Input PIN */}
+      <form onSubmit={handleLogin} className="flex flex-col items-center w-full max-w-xs">
+        <input
+          type="password"
+          inputMode="numeric"
+          maxLength={4}
+          value={pin}
+          onChange={(e) => {
+            setPin(e.target.value);
+            setError(false);
+          }}
+          placeholder="masukkan PIN"
+          className="w-full bg-white text-center px-4 py-5 rounded-2xl text-4xl tracking-[0.3em] font-black text-slate-900 mb-6 outline-none focus:ring-4 focus:ring-black/20 transition-all placeholder:text-slate-400 placeholder:text-lg placeholder:tracking-normal placeholder:font-medium shadow-lg"
+        />
+        
+        {/* Pesan Error jika PIN salah */}
+        {error && (
+          <p className="text-white bg-black/40 px-4 py-2 rounded-lg mb-6 text-sm font-semibold animate-bounce">
+            ❌ PIN Salah! Silakan coba lagi.
+          </p>
+        )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <input
-              type="password"
-              placeholder="Masukkan PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full text-center tracking-widest text-lg p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
-            />
-          </div>
-          
-          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
-          
-          <button
-            type="submit"
-            className="w-full bg-[#E51921] hover:bg-[#C4131A] text-white py-3 rounded-lg font-bold tracking-wide transition shadow-md"
-          >
-            MASUK
-          </button>
-        </form>
-
-        <div className="mt-8 text-center text-xs text-slate-400">
-          <p>&copy; {new Date().getFullYear()} Lyman Group. Internal Use Only.</p>
-        </div>
-      </div>
-
+        <button
+          type="submit"
+          className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl hover:bg-slate-900 transition-all shadow-xl active:scale-95"
+        >
+          MASUK
+        </button>
+      </form>
+      
     </div>
   );
 }

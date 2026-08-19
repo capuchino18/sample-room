@@ -65,7 +65,11 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const filteredSamples = samples.filter(s => (s.name || s.nama_sampel || s.seri || '').toLowerCase().includes(searchSampleTerm.toLowerCase()));
+  // REVISI: Logika filter ditambahkan agar mencari nama, kode, dan tipe produk
+  const filteredSamples = samples.filter(s => {
+    const searchString = `${s.name || s.nama_sampel || s.seri || ''} ${s.kode_produk || ''} ${s.tipe_produk || ''}`.toLowerCase();
+    return searchString.includes(searchSampleTerm.toLowerCase());
+  });
 
   const openTransactionModal = (type: 'MASUK' | 'KELUAR') => {
     setTransactionType(type);
@@ -120,8 +124,6 @@ export default function DashboardPage() {
          <div className="bg-white p-5 border rounded-xl shadow-sm"><h3 className="text-[11px] font-bold text-slate-500 mb-2 uppercase">Total Jenis</h3><p className="text-3xl font-black">{loading ? '...' : stats.totalJenis}</p></div>
          <div className="bg-[#FBB03B] p-5 border border-amber-400 rounded-xl shadow-sm"><h3 className="text-[11px] font-bold text-[#b91c1c] mb-2 uppercase">Jenis ROMAN</h3><p className="text-3xl font-black text-[#b91c1c]">{loading ? '...' : stats.romanJenis}</p></div>
          <div className="bg-slate-900 p-5 border border-slate-800 rounded-xl shadow-sm"><h3 className="text-[11px] font-bold text-slate-400 mb-2 uppercase">Jenis QUADRA</h3><p className="text-3xl font-black text-white">{loading ? '...' : stats.quadraJenis}</p></div>
-         
-         {/* Diubah menjadi nuansa merah serasi */}
          <div className="bg-red-50 p-5 border border-red-200 rounded-xl"><h3 className="text-[11px] font-bold text-red-700 mb-2 uppercase">Jenis Keluar Hari Ini</h3><p className="text-3xl font-black text-[#E31B23]">{loading ? '...' : stats.jenisKeluarHariIni}</p></div>
          <div className="bg-red-50 p-5 border border-red-200 rounded-xl"><h3 className="text-[11px] font-bold text-red-700 mb-2 uppercase">PCS Keluar Hari Ini</h3><p className="text-3xl font-black text-[#E31B23]">{loading ? '...' : stats.pcsKeluarHariIni}</p></div>
       </div>
@@ -163,13 +165,13 @@ export default function DashboardPage() {
             <h3 className="text-xl font-bold mb-4">Transaksi {transactionType}</h3>
             <form onSubmit={handleSimpanTransaksi}>
               <div className="mb-4 relative">
-                <input type="text" placeholder="Cari sampel..." value={searchSampleTerm} onChange={e => {setSearchSampleTerm(e.target.value); setIsDropdownOpen(true);}} className="w-full p-2 border rounded focus:ring-2 focus:ring-[#E31B23] outline-none" required />
+                <input type="text" placeholder="Cari nama, kode, atau tipe..." value={searchSampleTerm} onChange={e => {setSearchSampleTerm(e.target.value); setIsDropdownOpen(true);}} className="w-full p-2 border rounded focus:ring-2 focus:ring-[#E31B23] outline-none" required />
                 {isDropdownOpen && (
                   <ul className="absolute z-10 w-full mt-1 bg-white border shadow-lg rounded-lg max-h-48 overflow-y-auto">
                     {filteredSamples.map(s => (
                       <li key={s.id} className="p-2.5 hover:bg-slate-100 cursor-pointer text-sm border-b" onMouseDown={() => { setSelectedSample(s); setSearchSampleTerm(`${s.brand} - ${s.name}`); setIsDropdownOpen(false); }}>
                         <div className="font-bold">{s.name}</div>
-                        <div className="text-xs text-emerald-600">Rak {s.rak} / Amb {s.ambalan} | Stok: {s.stok}</div>
+                        <div className="text-xs text-emerald-600">Kode: {s.kode_produk || '-'} | Stok: {s.stok}</div>
                       </li>
                     ))}
                   </ul>
