@@ -48,20 +48,11 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Memastikan sesi tetap aktif
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Proteksi rute: jika belum login dan mencoba masuk ke /dashboard, arahkan ke /login
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith('/dashboard')
-  ) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
+  // Catatan: proyek ini menggunakan skema login PIN statis (disimpan di localStorage),
+  // bukan Supabase Auth. Supabase di sini hanya berfungsi sebagai database (lihat
+  // penggunaan supabase.from('samples') dsb. di halaman dashboard), sehingga proteksi
+  // rute berbasis supabase.auth.getUser() tidak relevan dan telah dihapus.
+  // Proteksi akses ke /dashboard dilakukan di sisi klien, lihat app/dashboard/layout.tsx.
 
   return supabaseResponse
 }

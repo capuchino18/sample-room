@@ -1,12 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Proteksi rute dashboard: cek status login PIN di localStorage.
+  // Menggantikan proteksi middleware Supabase Auth yang sebelumnya
+  // menyebabkan 404 karena mengarah ke rute /login yang tidak ada.
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('sample_room_logged_in');
+    if (isLoggedIn !== 'true') {
+      router.replace('/');
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-400 font-semibold text-sm">MEMERIKSA SESI...</p>
+      </div>
+    );
+  }
 
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard' },
