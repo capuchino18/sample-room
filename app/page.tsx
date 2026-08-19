@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -7,6 +7,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const router = useRouter();
+
+  // Cek jika sudah pernah login sebelumnya di device ini
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('sample_room_logged_in');
+    if (isLoggedIn === 'true') {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +24,10 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(false);
       
-      // Memberikan jeda waktu (1.5 detik) agar logo Lyman terlihat saat loading, lalu pindah ke dashboard
+      // SIMPAN STATUS LOGIN DI BROWSER DEVICE INI
+      localStorage.setItem('sample_room_logged_in', 'true');
+      
+      // Memberikan jeda waktu (1.5 detik) agar logo Lyman terlihat, lalu pindah ke dashboard
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
